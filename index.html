@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ruleta Pizza This..</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 100px;
+      "
+    >
+      <h1>Premio:</h1>
+      <div
+        style="
+          border: 2px solid;
+          width: 400px;
+          height: 40px;
+          text-align: center;
+          align-content: center;
+          background-color: white;
+          font-size: 27px;
+        "
+        id="result"
+      ></div>
+    </div>
+    <div
+      style="display: flex; justify-content: space-evenly; align-items: center"
+    >
+      <div>
+        <div id="roulette-standard"></div>
+      </div>
+    </div>
+    <video autoplay muted loop id="myVideo">
+      <source src="background.mp4" type="video/mp4" />
+    </video>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #a0244a;
+      }
+      #roulette-standard {
+        overflow: hidden;
+      }
+      #myVideo {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        z-index: 1;
+      }
+      body > div {
+        z-index: 10;
+        position: relative;
+      }
+    </style>
+    <script type="module">
+      import RouletteSpinner from "https://cdn.jsdelivr.net/npm/roulette-spinner@4.0.0/+esm";
+      import GSheetsReader from "https://cdn.jsdelivr.net/npm/g-sheets-api@2.2.0/+esm";
+
+      const options = {
+        apiKey: "AIzaSyBGkHarIkgdQEonnSLrasIwXDCXk3XTqgU",
+        sheetId: "1EkOpNnv97VyiFbWQ-SaZZNK_sMoSCaF0Yna7mmRpSKQ",
+        sheetNumber: 1,
+      };
+
+      GSheetsReader(
+        options,
+        (results) => {
+          createRoulette(results);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+
+      const createRoulette = (results) => {
+        const sections = [],
+          colors = [];
+        results.forEach((option) => {
+          for (let i = 0; i < option.cantidad; i++) {
+            if (i === Math.floor(option.cantidad / 2)) {
+              sections.push({
+                value: option.nombre.toUpperCase(),
+                src: option.imagen,
+                radius: 7 * option.cantidad,
+              });
+            } else {
+              sections.push({
+                value: option.nombre.toUpperCase(),
+                src: "ª",
+                radius: 0.1,
+              });
+            }
+          }
+        });
+
+        results.forEach((option) => {
+          for (let i = 0; i < option.cantidad; i++) {
+            colors.push(option.color);
+          }
+        });
+        const rouletteStandard = new RouletteSpinner({
+          container: "roulette-standard",
+          sections,
+          colors,
+          settings: {
+            border: {
+              width: 0,
+            },
+          },
+          board: {
+            radius: 360,
+          },
+          audio: {
+            volume: 25,
+          },
+        });
+
+        const imgs = document
+          .getElementById("roulette-standard")
+          .getElementsByTagName("image");
+
+        for (let i = 0; i < imgs.length; i++) {
+          if (imgs[i].getAttribute("height") !== "0.2") {
+            document.getElementById("roulette-circle").appendChild(imgs[i]);
+          }
+        }
+
+        const texts = document
+          .getElementById("roulette-standard")
+          .getElementsByTagName("text");
+
+        for (let i = 0; i < texts.length; i++) {
+          const transform = texts[i].getAttribute("transform");
+          var regExp = /\(([^)]+)\)$/;
+          var matches = regExp.exec(transform);
+          const newtransform = transform.replace(
+            matches[1],
+            Number(matches[1]) + 90
+          );
+          texts[i].setAttribute("transform", newtransform);
+          texts[i].setAttribute("font-family", "Josefin Sans");
+          texts[i].setAttribute("font-weight", "bold");
+        }
+
+        const resultElem = document.getElementById("result");
+
+        function onstart() {
+          resultElem.innerHTML = "";
+        }
+
+        rouletteStandard.onstart = onstart;
+
+        function onstop(result) {
+          resultElem.innerHTML = result.value;
+        }
+
+        rouletteStandard.onstop = onstop;
+
+        document
+          .getElementById("roulette-standard")
+          .addEventListener("click", () => {
+            rouletteStandard.roll();
+          });
+      };
+    </script>
+  </body>
+</html>
