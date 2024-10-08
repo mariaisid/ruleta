@@ -147,12 +147,27 @@
 
         for (let i = 0; i < texts.length; i++) {
           const transform = texts[i].getAttribute("transform");
-          var regExp = /\(([^)]+)\)$/;
-          var matches = regExp.exec(transform);
-          const newtransform = transform.replace(
-            matches[1],
-            Number(matches[1]) + 90
+          var rotateRegex = /\(([^)]+)\)$/;
+          var translateRegex = /\(([^)]+)\,/;
+          var rotate = rotateRegex.exec(transform);
+          let newtransform = transform.replace(
+            rotate[1],
+            Number(rotate[1]) + 90
           );
+          console.log(texts[i].textContent);
+          if (
+            results.some(
+              (result) =>
+                texts[i].textContent === result.nombre.toUpperCase() &&
+                Number(result.cantidad) % 2 === 0
+            )
+          ) {
+            var translate = translateRegex.exec(transform);
+            newtransform = newtransform.replace(
+              translate[1],
+              Number(translate[1]) - 10
+            );
+          }
           texts[i].setAttribute("transform", newtransform);
           texts[i].setAttribute("font-family", "Josefin Sans");
           texts[i].setAttribute("font-weight", "bold");
