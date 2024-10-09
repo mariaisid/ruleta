@@ -24,12 +24,13 @@
       <div
         style="
           border: 2px solid;
-          width: 400px;
-          height: 40px;
+          min-width: 600px;
+          width: auto;
+          height: 60px;
           text-align: center;
           align-content: center;
           background-color: white;
-          font-size: 27px;
+          font-size: 50px;
         "
         id="result"
       ></div>
@@ -40,6 +41,9 @@
       <div>
         <div id="roulette-standard"></div>
       </div>
+    </div>
+    <div class="centered">
+      <img src="" id="premio" />
     </div>
     <video autoplay muted loop id="myVideo">
       <source src="background2.mp4" type="video/mp4" />
@@ -63,6 +67,18 @@
       body > div {
         z-index: 10;
         position: relative;
+      }
+      .centered {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+        pointer-events: none;
+      }
+      #premio {
+        height: 0px;
+        pointer-events: none;
       }
     </style>
     <script type="module">
@@ -154,14 +170,7 @@
             rotate[1],
             Number(rotate[1]) + 90
           );
-          console.log(texts[i].textContent);
-          if (
-            results.some(
-              (result) =>
-                texts[i].textContent === result.nombre.toUpperCase() &&
-                Number(result.cantidad) % 2 === 0
-            )
-          ) {
+          if (texts[i].textContent === "menú personalizado".toUpperCase()) {
             var translate = translateRegex.exec(transform);
             newtransform = newtransform.replace(
               translate[1],
@@ -183,6 +192,20 @@
 
         function onstop(result) {
           resultElem.innerHTML = result.value;
+          var src = results.find(
+            (option) => option.nombre.toUpperCase() === result.value
+          ).imagen;
+          if (src) {
+            const premioImg = document.getElementById("premio");
+            premioImg.setAttribute("src", src);
+            premioImg.animate([{ height: "0px" }, { height: "600px" }], {
+              duration: 2000,
+              iterations: 1,
+            });
+            /* anim.onfinish(() => {
+              premioImg.setAttribute("src", "");
+            }); */
+          }
         }
 
         rouletteStandard.onstop = onstop;
